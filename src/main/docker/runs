@@ -1,0 +1,11 @@
+docker run --name mongo -d -p 27017:27017 -v /data/mongo:/data/db mongo --auth
+docker exec -it mongo mongo admin
+db.createUser({ user: 'customer-api', pwd: 'customer#123456', roles: [ { role: "readWrite", db: "admin" } ] });
+
+docker run --name eureka -d -p 8761:8761 rafaelandrade/eureka-server
+
+docker run --name config-server -d -p 8888:8888 -e "eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka/" -e "spring.cloud.config.server.git.uri=file:/tmp/config" --link eureka:eureka -v /opt/config-server:/tmp/config rafaelandrade/config-server
+
+docker run --name zuul-server -d -p 7070:7070 -e "spring.cloud.config.uri=http://config-server:8888" -e "eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka/" -e "eureka.client.enable=true" --link config-server:config-server --link eureka:eureka rafaelandrade/zuul-server
+
+docker run -d -e "spring.cloud.config.uri=http://config-server:8888" -h docker --link eureka:eureka --link mongo:mongo --link config-server:config-server --link zuul-server:zuul-server rafaelandrade/customer-api

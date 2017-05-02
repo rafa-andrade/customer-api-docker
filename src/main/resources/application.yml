@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    enabled: false
+
+spring:
+  data:
+    mongodb:
+      database: admin
+      host: mongo
+      password: customer#123456
+      port: 27017
+      username: customer-api

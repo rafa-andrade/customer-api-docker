@@ -1,0 +1,12 @@
+docker run --name mongo-customer -d -p 27017:27017 mongo --auth
+
+docker exec -it mongo-customer mongo admin
+
+db.createUser({ user: 'customer', pwd: 'customer#123456', roles: [ { role: "readWrite", db: "admin" } ] });
+
+docker run --name customer-api -d -p 8080:8080 --link mongo-customer:mongo-customer rafaelandrade/customer-api
+
+
+
+
+mvn package docker:build -DpushImage
